@@ -1,12 +1,38 @@
-select *
+select * from
 (SELECT
-  store,
-  LEFT(REGEXP_REPLACE(msg, r"^[\d]|[^a-zA-Z0-9_]", "_"),300) AS store_new
+  colomn1,colonm2,colomn3
+  LEFT(REGEXP_REPLACE(colomn1, r"^[\d]|[^a-zA-Z0-9_]", "_"),300) AS colomn1_new
 FROM
   `projectname.datasetname.tablename`)
 PIVOT
-(AVG(cost) as avgcost
-For store_new)
+(AVG(colomn2) as avgcolomn2
+For colomn1_new)
+
+##EXAMPLE##
+
+
+##Created a table
+CREATE TABLE IF NOT EXISTS `studied-theater-328409.Test.question8`
+(
+    Store STRING
+    , customer STRING -- INT64 for INTEGER column
+    , cost FLOAT64 -- FLOAT64 for FLOAT column
+);
+
+##inserted some data
+
+INSERT INTO  `studied-theater-328409.Test.question8` (Store,customer,cost)
+VALUES
+    ("@nike", "aa", 20),("nike", "aa", 30),("nike", "aa", 40),("LVMH", "dd", 50),("LVMH", "ee", 60);
+
+
+##pivot table as per BQ schema requirement
+select * from
+(select store,customer,cost,LEFT(REGEXP_REPLACE(store, r"^[\d]|[^a-zA-Z0-9_]", ""),300) AS store_new from `studied-theater-328409.Test.question8` ) 
+pivot (AVG(cost) as avgcost For store_new in ("nike","LVMH"))
+
+
+
 
 
 

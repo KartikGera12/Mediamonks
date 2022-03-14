@@ -1,12 +1,12 @@
 select *
 (SELECT
-  msg,
-  LEFT(REGEXP_REPLACE(msg, r"^[\d]|[^a-zA-Z0-9_]", "_"),300) AS msg_new
+  store,
+  LEFT(REGEXP_REPLACE(msg, r"^[\d]|[^a-zA-Z0-9_]", "_"),300) AS store_new
 FROM
   `projectname.datasetname.tablename`)
 PIVOT
 (AVG(cost) as avgcost
-For msg_new)
+For store_new)
 
 
 

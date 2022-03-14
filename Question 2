@@ -1,0 +1,15 @@
+## query
+
+SELECT * FROM`bigquery-public-data.ga4_obfuscated_sample_ecommerce.events_20210131`,
+unnest(event_params) limit 10;
+
+## With example
+
+
+with main as (SELECT * FROM`bigquery-public-data.ga4_obfuscated_sample_ecommerce.events_20210131`,
+unnest(event_params))
+SELECT main.event_name FROM main where key = 'debug_mode'
+and value.int_value=1
+limit 10;
+ 
+ 

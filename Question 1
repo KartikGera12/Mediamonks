@@ -1,0 +1,10 @@
+ with main_table as (SELECT *
+FROM `bigquery-public-data.google_cloud_release_notes.release_notes`
+where  release_note_type = "ISSUE"
+and published_at > DATE '2021-10-01'),
+second_table as (select distinct(b.description) from `bigquery-public-data.google_cloud_release_notes.release_notes` a 
+left join main_table b 
+on a.description = b.description
+where a.release_note_type = 'FIX'
+and a.published_at > b.published_at)
+select distinct(product_name) from main_table where description not in (select description from second_table);

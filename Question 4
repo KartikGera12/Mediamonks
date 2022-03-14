@@ -1,0 +1,38 @@
+# Use Python argparse module to parse custom arguments
+import argparse
+
+import apache_beam as beam
+from apache_beam.options.pipeline_options import PipelineOptions
+
+def print_row(element):
+  print(element)
+
+def get_len(element):
+  return len(str(element).split(",")) > 2
+
+# For more details on how to use argparse, take a look at:
+#   https://docs.python.org/3/library/argparse.html
+parser = argparse.ArgumentParser()
+parser.add_argument(
+    '--input-file',
+    default='gs://cloud-samples-data/bigquery/us-states/us-states.csv',
+    help='The file path for the input text to process.')
+parser.add_argument(
+    '--output-path', required=True, help='The path prefix for output files.')
+args, beam_args = parser.parse_known_args()
+
+# Create the Pipeline with remaining arguments.
+beam_options = PipelineOptions(beam_args)
+with beam.Pipeline(options=beam_options) as pipeline:
+  lines = (
+      pipeline
+      | 'Read files' >> beam.io.ReadFromText(args.input_file))
+
+  ss = (
+    lines
+    | 'Skipper' >> beam.Map(
+        lambda line: line)
+    | 'Filter' >> beam.Filter(get_len)
+    | 'Write files' >> beam.io.WriteToText(args.output_path)
+
+  )

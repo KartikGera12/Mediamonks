@@ -1,21 +1,29 @@
+
+DECLARE temp_variable STRING;
+SET temp_variable = (
+  select CONCAT('("',STRING_AGG(DISTINCT LEFT(REGEXP_REPLACE(colomn1, r"^[\d]|[^a-zA-Z0-9_]", ""),300), '", "'), '")') 
+from `projectname.datasetname.tablename`
+);
+
+
+EXECUTE IMMEDIATE format("""
 select * from
 (SELECT
   colomn1,colonm2,colomn3
   LEFT(REGEXP_REPLACE(colomn1, r"^[\d]|[^a-zA-Z0-9_]", "_"),300) AS colomn1_new
-FROM
-  `projectname.datasetname.tablename`)
-PIVOT
-(AVG(colomn2) as avgcolomn2
-For colomn1_new)
+FROM `projectname.datasetname.tablename`)
+pivot (AVG(colomn2) as avgcolomn2
+For colomn1_new in %s)
+""", temp_variable);
 
-##EXAMPLE##
+#####EXAMPLE########
 
 
 ##Created a table
 CREATE TABLE IF NOT EXISTS `studied-theater-328409.Test.question8`
 (
     Store STRING
-    , customer STRING -- INT64 for INTEGER column
+    , customer STRING 
     , cost FLOAT64 -- FLOAT64 for FLOAT column
 );
 
@@ -26,12 +34,24 @@ VALUES
     ("@nike", "aa", 20),("nike", "aa", 30),("nike", "aa", 40),("LVMH", "dd", 50),("LVMH", "ee", 60);
 
 
-##pivot table as per BQ schema requirement
+##pivot table as per BQ schema requirement by using Execute Immidiate Querry
+
+
+##declared a temp variable
+DECLARE store_temp STRING;
+SET store_temp = (
+  select CONCAT('("',STRING_AGG(DISTINCT LEFT(REGEXP_REPLACE(store, r"^[\d]|[^a-zA-Z0-9_]", ""),300), '", "'), '")') 
+from `studied-theater-328409.Test.question8`
+);
+
+
+EXECUTE IMMEDIATE format("""
 select * from
-(select store,customer,cost,LEFT(REGEXP_REPLACE(store, r"^[\d]|[^a-zA-Z0-9_]", ""),300) AS store_new from `studied-theater-328409.Test.question8` ) 
-pivot (AVG(cost) as avgcost For store_new in ("nike","LVMH"))
-
-
+(select customer,cost,LEFT(REGEXP_REPLACE(store, r'^[0-9]|[^a-zA-Z0-9_]', ''),300) AS store_new
+ from `studied-theater-328409.Test.question8` ) 
+pivot (AVG(cost) as avgcost For store_new in %s)
+ORDER BY customer ASC
+""", store_temp);
 
 
 
